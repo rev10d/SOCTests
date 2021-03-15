@@ -3,7 +3,7 @@
 #
 
 #
-# Housecleaning first
+# Housecleaning first, and run PowerShell as admin whereever you have admin privs. 
 #
 
 powershell -ep bypass
