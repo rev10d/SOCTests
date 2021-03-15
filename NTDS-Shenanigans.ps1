@@ -6,7 +6,7 @@
 # Housecleaning first
 #
 
-powershell -ep bypass -confirm:$false
+powershell -ep bypass
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #
